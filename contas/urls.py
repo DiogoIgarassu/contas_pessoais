@@ -1,26 +1,31 @@
-"""contas URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from credito.views import fatura,add_compra, edit_compra, del_compra
+from api.views import UserViewSet, CreditoViewSet
+from rest_framework import routers
+from rest_framework_swagger.views import get_swagger_view
+from rest_framework.schemas import get_schema_view
+
+
+schema_view = get_swagger_view(title='Pastebin API')
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
+router.register(r'credito', CreditoViewSet)
 
 urlpatterns = [
+    path('', include(router.urls)),
+    path("docs/", schema_view, name='docs'),
     path('admin/', admin.site.urls),
     path('fatura', fatura, name="fatura"),
     path('edit_compra/<int:pk>/', edit_compra, name="edit_compra"),
     path('del_compra/<int:pk>/', del_compra, name="del_compra"),
-    path('add_compra', add_compra, name="add_compra")
+    path('add_compra', add_compra, name="add_compra"),
+    path('api-auth/', include('rest_framework.urls')),
+    path('openapi', get_schema_view(
+        title="Your Project",
+        description="API for all things …",
+        version="1.0.0"
+    ), name='openapi-schema'),
 ]
+
+
