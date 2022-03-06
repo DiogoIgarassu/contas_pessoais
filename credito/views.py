@@ -119,12 +119,6 @@ def add_compra(request):
         elif "save" in compras:
             return redirect('fatura')
 
-    valor_total = Compras.objects.all().aggregate(q=Sum('valor'))
-
-    context['VENCIMENTO'] = data_pagamento
-    context['VALOR_TOTAL'] = valor_total['q']
-    context['MES_REFERENCIA'] = mes_referencia(next_payday(TODAY)).capitalize()
-
     return render(request, 'credito/add_compra.html', context)
 
 
@@ -149,14 +143,6 @@ def edit_compra(request, pk):
 
         compra.save()
         return redirect('fatura')
-
-
-    valor_total = Compras.objects.all().aggregate(q=Sum('valor'))
-
-    context['compra'] = compra
-    context['VENCIMENTO'] = data_pagamento
-    context['VALOR_TOTAL'] = valor_total['q']
-    context['MES_REFERENCIA'] = mes_referencia(next_payday(TODAY)).capitalize()
 
     return render(request, 'credito/edit_compra.html', context)
 
