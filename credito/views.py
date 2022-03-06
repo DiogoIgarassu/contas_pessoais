@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from credito.models import Compras
 import datetime
-from django.db.models import Sum
+import requests
+from json import dumps
 
 
 mes_english = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
@@ -154,3 +155,24 @@ def del_compra(request, pk):
 
     return redirect('fatura')
 
+
+def TransDatas():
+    link = 'https://contas-diogoigarassu.herokuapp.com/credito/'
+    data_pagamento = next_payday(TODAY)
+    compras = Compras.objects.filter(data_pagamento=data_pagamento).order_by('data_compra')
+    for compra in compras:
+        data_pag = str(compra.data_pagamento.strftime('%Y-%m-%d'))
+        data_comp = str(compra.data_compra.strftime('%Y-%m-%d'))
+        print(data_comp, data_pag, compra.descricao)
+        response = requests.post(link, auth=('admin','admin'), json={
+          "data_pagamento": data_pag,
+          "data_compra": data_comp,
+          "loja": compra.loja,
+          "parcela": compra.parcela,
+          "valor": compra.valor,
+          "descricao": compra.descricao,
+          "categoria": compra.categoria,
+          "responsavel": compra.responsavel
+        })
+        print(response.status_code)
+    return print("Processo concluído!!!")
