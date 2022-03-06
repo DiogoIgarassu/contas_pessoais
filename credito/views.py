@@ -145,6 +145,10 @@ def edit_compra(request, pk):
         compra.save()
         return redirect('fatura')
 
+
+    context['compra'] = compra
+    context['MES_REFERENCIA'] = mes_referencia(next_payday(TODAY)).capitalize()
+
     return render(request, 'credito/edit_compra.html', context)
 
 
