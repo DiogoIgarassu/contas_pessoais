@@ -28,7 +28,7 @@
         {% csrf_token %}
         <div class="col-md-3 mb-3">
             <label for="FormControl1" class="form-label">Data de Pagamento</label>
-            <input type="text" class="form-control" id="FormControl1"  oninput="handleInput(event)" name="data_pagamento" value="{{ VENCIMENTO|date:'d/m/Y' }}"
+            <input type="text" class="form-control" id="FormControl1"  oninput="handleInput(event)" name="data_pagamento" value="{{ data_pagamento|date:'d/m/Y' }}"
                    placeholder="Data de Pagamento" required>
         </div>
 

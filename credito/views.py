@@ -79,8 +79,7 @@ def fatura(request):
 
 
 def add_compra(request):
-    context = {}
-    data_pagamento = next_payday(TODAY)
+    context = {'data_pagamento': next_payday(TODAY)}
 
     if request.method == "POST":
         compras = dict(request.POST.items())
