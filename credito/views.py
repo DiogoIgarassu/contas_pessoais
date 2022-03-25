@@ -80,6 +80,16 @@ def fatura(request):
 
 def add_compra(request):
     context = {'data_pagamento': next_payday(TODAY)}
+    responsaveis, categorias = [], []
+    dados = Compras.objects.all()
+
+    for dado in dados:
+        if not dado.categoria in categorias:
+            categorias.append(dado.categoria)
+        if not dado.responsavel in responsaveis:
+            responsaveis.append(dado.responsavel)
+    context['categorias'] = categorias
+    context['responsaveis'] = responsaveis
 
     if request.method == "POST":
         compras = dict(request.POST.items())

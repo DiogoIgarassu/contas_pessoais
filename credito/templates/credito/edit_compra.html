@@ -1,24 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Fatura</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-
-
-</head>
-<body>
-<script>
-function handleInput(e) {
-   var ss = e.target.selectionStart;
-   var se = e.target.selectionEnd;
-   e.target.value = e.target.value.toUpperCase();
-   e.target.selectionStart = ss;
-   e.target.selectionEnd = se;
-}
-</script>
+{% extends "credito/base.html" %}
+{% load static %}
+{% block content %}
 
 <div class="container m-5">
   <h2>Fatura atual referênte ao mês de {{ MES_REFERENCIA }}</h2>
@@ -57,11 +39,21 @@ function handleInput(e) {
             </div>
             <div class="col-md-3 mb-3">
                 <label for="FormControl7" class="form-label">Categoria</label>
-                <input type="text" id="FormControl7" class="form-control" oninput="handleInput(event)" name="categoria" value="{{ compra.categoria }}">
+                <input list="categorias" type="text" id="FormControl7" class="form-control" oninput="handleInput(event)" name="categoria" value="{{ compra.categoria }}">
+                <datalist id="categorias">
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria }}">
+                    {% endfor %}
+                </datalist>
             </div>
             <div class="col-md-3 mb-3">
                 <label for="FormControl8" class="form-label">Responsável</label>
-                <input type="text" id="FormControl8" class="form-control" oninput="handleInput(event)" name="responsavel" value="{{ compra.responsavel }}">
+                <input list="responsaveis" type="text" id="FormControl8" class="form-control" oninput="handleInput(event)" name="responsavel" value="{{ compra.responsavel }}">
+                 <datalist id="responsaveis">
+                    {% for responsavel in responsaveis %}
+                    <option value="{{ responsavel }}">
+                    {% endfor %}
+                </datalist>
             </div>
          </div>
       <div class="mb-3 d-flex justify-content-end">
@@ -94,31 +86,4 @@ function handleInput(e) {
 </div>
 
 
- <!-- Scripts -->
-
-<script>
-// Example starter JavaScript for disabling form submissions if there are invalid fields
-(function() {
-  'use strict';
-  window.addEventListener('load', function() {
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    var forms = document.getElementsByClassName('needs-validation');
-    // Loop over them and prevent submission
-    var validation = Array.prototype.filter.call(forms, function(form) {
-      form.addEventListener('submit', function(event) {
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-      }, false);
-    });
-  }, false);
-})();
-</script>
-
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-</body>
-</html>
+ {% endblock %}
