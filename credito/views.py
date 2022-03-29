@@ -4,7 +4,7 @@ import datetime
 import requests
 from math import pi
 import pandas as pd
-from bokeh.palettes import Set2, Category20
+from bokeh.palettes import Set3, Category20
 from bokeh.plotting import figure, show
 from bokeh.transform import cumsum
 from collections import defaultdict
@@ -170,11 +170,18 @@ def edit_compra(request, pk):
 def del_compra(request, pk):
 
     compra = Compras.objects.get(pk=pk)
-    compra.delete()
+    if "/" in compra.parcela:
+        compras = Compras.objects.filter(data_compra=compra.data_compra, loja=compra.loja, valor=compra.valor,
+                                         responsavel=compra.responsavel)
+        for parcela in compras:
+            parcela.delete()
+    else:
+        compra.delete()
 
     return redirect('fatura')
 
 
+#USADO PARA TRANSFERIR DADOS DO BANCO LOCAL PARA O BANCO EM PRODUÇÃO
 def TransDatas():
     link = 'https://contas-diogoigarassu.herokuapp.com/credito/'
     data_pagamento = next_payday(TODAY)
@@ -248,7 +255,7 @@ def dashboard(request):
     # GRAFICO DE RESPONSÁVEIS
     data = pd.Series(responsaveis).reset_index(name='value').rename(columns={'index': 'responsavel'})
     data['angle'] = data['value'] / data['value'].sum() * 2 * pi
-    data['color'] = Set2[len(responsaveis)]
+    data['color'] = Set3[len(responsaveis)]
 
     p = figure(height=350, title="Gastos por responsável", toolbar_location=None,
                tools="hover", tooltips="@responsavel: @value", x_range=(-0.5, 1.0))
