@@ -2,7 +2,13 @@ from django.shortcuts import render, redirect
 from credito.models import Compras
 import datetime
 import requests
-from json import dumps
+from math import pi
+import pandas as pd
+from bokeh.palettes import Set2, Category20
+from bokeh.plotting import figure, show
+from bokeh.transform import cumsum
+from collections import defaultdict
+from bokeh.embed import components
 
 
 mes_english = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
@@ -189,3 +195,74 @@ def TransDatas():
         })
         print(response.status_code)
     return print("Processo concluído!!!")
+
+
+def dashboard(request):
+    context = {}
+
+    data_pagamento = next_payday(TODAY)
+    compras = Compras.objects.filter(data_pagamento=data_pagamento)
+
+    responsaveis = defaultdict(list)
+    categorias = defaultdict(list)
+
+    for compra in compras:
+       valor = compra.valor
+       valor = valor.replace(',','.')
+       valor = round(float(valor), 2)
+
+       if compra.responsavel in responsaveis:
+           responsaveis[compra.responsavel] = responsaveis[compra.responsavel] + valor
+       else:
+           responsaveis[compra.responsavel] = valor
+
+       if compra.categoria in categorias:
+           categorias[compra.categoria] = categorias[compra.categoria] + valor
+       else:
+           categorias[compra.categoria] = valor
+
+    context['compras'] = compras
+    #context['contador'] = [x for x in range(1, compras.count() + 1)]
+    context['MES_REFERENCIA'] = mes_referencia(next_payday(TODAY)).capitalize()
+
+    #GRAFICO DE CATEGOTIAS
+    data2 = pd.Series(categorias).reset_index(name='value').rename(columns={'index': 'categoria'})
+    data2['angle'] = data2['value'] / data2['value'].sum() * 2 * pi
+    data2['color'] = Category20[len(categorias)]
+
+    p2 = figure(height=350, title="Gastos por Categoria", toolbar_location=None,
+               tools="hover", tooltips="@categoria: @value", x_range=(-0.5, 1.0))
+
+    p2.wedge(x=0, y=1, radius=0.4,
+            start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+            line_color="white", fill_color='color', legend_field='categoria', source=data2)
+
+    p2.axis.axis_label = None
+    p2.axis.visible = False
+    p2.grid.grid_line_color = None
+
+    script2, div2 = components(p2)
+    context['script2'] = script2
+    context['div2'] = div2
+
+    # GRAFICO DE RESPONSÁVEIS
+    data = pd.Series(responsaveis).reset_index(name='value').rename(columns={'index': 'responsavel'})
+    data['angle'] = data['value'] / data['value'].sum() * 2 * pi
+    data['color'] = Set2[len(responsaveis)]
+
+    p = figure(height=350, title="Gastos por responsável", toolbar_location=None,
+               tools="hover", tooltips="@responsavel: @value", x_range=(-0.5, 1.0))
+
+    p.wedge(x=0, y=1, radius=0.4,
+            start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+            line_color="white", fill_color='color', legend_field='responsavel', source=data)
+
+    p.axis.axis_label = None
+    p.axis.visible = False
+    p.grid.grid_line_color = None
+
+    script, div = components(p)
+    context['script'] = script
+    context['div'] = div
+
+    return render(request, 'credito/dashboard.html', context)
