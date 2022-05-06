@@ -49,9 +49,13 @@ def mes_referencia(date):
     return mes_ref_pt
 
 
-def fatura(request):
+def fatura(request, mes=None):
     context = {}
-    data_pagamento = next_payday(TODAY)
+    if mes:
+        data_pagamento = datetime.datetime.strptime(mes, '%Y-%m-%d').date()
+    else:
+        data_pagamento = next_payday(TODAY)
+
     compras = Compras.objects.filter(data_pagamento=data_pagamento).order_by('data_compra')
     valor_total = Compras.objects.filter(data_pagamento=data_pagamento)
     valor_total_credito  = Compras.objects.filter(data_pagamento=data_pagamento).filter(parcela__icontains="/")
@@ -60,12 +64,17 @@ def fatura(request):
     soma_compras = 0
     for t in valor_total:
         valort = t.valor.replace(',','.')
-        soma_compras += float(valort)
-
+        try:
+            soma_compras += float(valort)
+        except:
+            print(t, 'valor com problema em soma compras')
     soma_credito = 0
     for v in valor_total_credito:
        valor = v.valor.replace(',','.')
-       soma_credito += float(valor)
+       try:
+           soma_credito += float(valor)
+       except:
+           print(v, 'valor com problema em soma creditos')
 
     soma_externo = 0
     for e in valor_total_externo:
@@ -78,8 +87,19 @@ def fatura(request):
     context['VENCIMENTO'] = data_pagamento
     context['VALOR_TOTAL'] = '{:.2f}'.format(soma_compras)
     context['compras'] = compras
-    #context['contador'] = [x for x in range(1, compras.count() + 1)]
-    context['MES_REFERENCIA'] = mes_referencia(next_payday(TODAY)).capitalize()
+    context['MES_REFERENCIA'] = mes_referencia(data_pagamento).capitalize()
+
+    data_proxima = (data_pagamento.replace(month=data_pagamento.month + 1)
+                                  if data_pagamento.month < 12
+                                  else data_pagamento.replace(year=data_pagamento.year + 1, month=1, day=9))
+    data_anterior = (data_pagamento.replace(month=data_pagamento.month - 1)
+                                  if data_pagamento.month > 1
+                                  else data_pagamento.replace(year=data_pagamento.year - 1, month=12, day=9))
+
+    context['MES_GASTOS'] = mes_referencia(data_anterior).capitalize()
+    context['PROX_MES'] = mes_referencia(data_proxima).capitalize()
+    context['DATA_ANTERIOR'] = str(data_anterior)
+    context['DATA_PROXIMA'] = str(data_proxima)
 
     return render(request, 'credito/fatura.html', context)
 
@@ -105,14 +125,14 @@ def add_compra(request):
         if '/' in compras['parcelas']:
             parcelas = compras['parcelas'].split("/")
 
-            for n in range(1, int(parcelas[1]) +1 ):
+            for n in range(1, int(parcelas[1]) + 1):
                 parcela = f'{n}/{int(parcelas[1])}'
 
                 if new_payday.month + n - 1 > 12:
                     mes = new_payday.month + n - 13
                     ano = new_payday.year + 1
                 else:
-                    mes = new_payday.month + n -1
+                    mes = new_payday.month + n - 1
                     ano = new_payday.year
 
                 add_payday = new_payday.replace(year=ano, month=mes, day=9)

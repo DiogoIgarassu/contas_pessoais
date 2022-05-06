@@ -17,6 +17,7 @@ urlpatterns = [
     path("docs/", schema_view, name='docs'),
     path('admin/', admin.site.urls),
     path('fatura', fatura, name="fatura"),
+    path('fatura/<str:mes>', fatura, name="fatura"),
     path('dashboard', dashboard, name="dashboard"),
     path('edit_compra/<str:pk>/', edit_compra, name="edit_compra"),
     path('del_compra/<str:pk>/', del_compra, name="del_compra"),
