@@ -38,8 +38,11 @@ def next_payday(date):
             return date.replace(year=date.year + 1, month=1, day=9)
         return date.replace(month=date.month + 1, day=9)
     else:
-        data_payday = date.replace(month=date.month+2, day=9)
-        return data_payday
+        if date.month == 11:
+            return date.replace(year=date.year + 1, month=1, day=9)
+        elif date.month == 12:
+            return date.replace(year=date.year + 1, month=2, day=9)
+        return date.replace(month=date.month+2, day=9)
 
 
 def mes_referencia(date):
