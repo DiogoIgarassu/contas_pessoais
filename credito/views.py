@@ -240,7 +240,9 @@ def dashboard(request, mes=None):
 
     for compra in compras:
        valor = compra.valor
-       valor = valor.replace(',','.')
+       valor = valor.replace(',', '.')
+       if "-" in str(valor):
+           valor = float(0)
        try:
         valor = round(float(valor), 2)
        except:
