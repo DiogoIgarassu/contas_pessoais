@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from credito.views import fatura,add_compra, edit_compra, del_compra, dashboard
+from credito.views import fatura,add_compra, edit_compra, del_compra, dashboard, TransfBaseDados
 from api.views import UserViewSet, CreditoViewSet
 from rest_framework import routers
 from rest_framework_swagger.views import get_swagger_view
@@ -18,7 +18,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('fatura', fatura, name="fatura"),
     path('fatura/<str:mes>', fatura, name="fatura"),
+    path('transferir', TransfBaseDados, name="transferir"),
     path('dashboard', dashboard, name="dashboard"),
+    path('dashboard/<str:mes>', dashboard, name="dashboard"),
     path('edit_compra/<str:pk>/', edit_compra, name="edit_compra"),
     path('del_compra/<str:pk>/', del_compra, name="del_compra"),
     path('add_compra', add_compra, name="add_compra"),

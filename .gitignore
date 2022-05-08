@@ -1,6 +1,8 @@
 venv
 *.pyc
 staticfiles
-.env
 .db.sqlite3
 getting-started/*
+fatura.csv
+__pycache__
+fatura.xlsx

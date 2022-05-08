@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from credito.models import Compras
 import datetime
 import requests
@@ -227,10 +227,12 @@ def TransDatas():
     return print("Processo concluído!!!")
 
 
-def dashboard(request):
+def dashboard(request, mes=None):
     context = {}
-
-    data_pagamento = next_payday(TODAY)
+    if mes:
+        data_pagamento = datetime.datetime.strptime(mes, '%Y-%m-%d').date()
+    else:
+        data_pagamento = next_payday(TODAY)
     compras = Compras.objects.filter(data_pagamento=data_pagamento)
 
     responsaveis = defaultdict(list)
@@ -239,8 +241,11 @@ def dashboard(request):
     for compra in compras:
        valor = compra.valor
        valor = valor.replace(',','.')
-       valor = round(float(valor), 2)
-
+       try:
+        valor = round(float(valor), 2)
+       except:
+            context['erro'] = f'erro na compra {compra.loja} em {compra.data_compra} por causa do valor {valor}'
+            valor = float(0)
        if compra.responsavel in responsaveis:
            responsaveis[compra.responsavel] = responsaveis[compra.responsavel] + valor
        else:
@@ -253,7 +258,7 @@ def dashboard(request):
 
     context['compras'] = compras
     #context['contador'] = [x for x in range(1, compras.count() + 1)]
-    context['MES_REFERENCIA'] = mes_referencia(next_payday(TODAY)).capitalize()
+    context['MES_REFERENCIA'] = mes_referencia(data_pagamento).capitalize()
 
     #GRAFICO DE CATEGOTIAS
     data2 = pd.Series(categorias).reset_index(name='value').rename(columns={'index': 'categoria'})
@@ -294,5 +299,47 @@ def dashboard(request):
     script, div = components(p)
     context['script'] = script
     context['div'] = div
+    data_proxima = (data_pagamento.replace(month=data_pagamento.month + 1)
+                                  if data_pagamento.month < 12
+                                  else data_pagamento.replace(year=data_pagamento.year + 1, month=1, day=9))
+    data_anterior = (data_pagamento.replace(month=data_pagamento.month - 1)
+                                  if data_pagamento.month > 1
+                                  else data_pagamento.replace(year=data_pagamento.year - 1, month=12, day=9))
+
+    context['MES_GASTOS'] = mes_referencia(data_anterior).capitalize()
+    context['PROX_MES'] = mes_referencia(data_proxima).capitalize()
+    context['DATA_ANTERIOR'] = str(data_anterior)
+    context['DATA_PROXIMA'] = str(data_proxima)
 
     return render(request, 'credito/dashboard.html', context)
+
+
+#USADO PARA TRANSFERIR DADOS DO EXCEL PARA O BANCO EM PRODUÇÃO
+def TransfBaseDados(request):
+    dados = open('fatura.csv', encoding="utf8").readlines()
+    link = 'https://contas-diogoigarassu.herokuapp.com/credito/'
+    for i in range(len(dados)):
+        if i > 0:
+            linha = dados[i].strip().replace('"', '')
+            linha = linha.split(';')
+            print(linha)
+            data_pg = f'{linha[0][6:]}-{linha[0][3:5]}-{linha[0][:2]}'
+            data_cp = f'{linha[1][6:]}-{linha[1][3:5]}-{linha[1][:2]}'
+            print(data_pg, data_cp, "datas de pagamento e compra")
+            response = requests.post(link, auth=('admin', 'admin'), json={
+              "data_pagamento": data_pg,
+              "data_compra": data_cp,
+              "loja": linha[2],
+              "parcela": linha[3],
+              "valor": linha[4],
+              "descricao": linha[5],
+              "categoria": linha[6],
+              "responsavel": linha[7]
+            })
+            print(response.status_code)
+
+            if response.status_code == 400:
+                print(response.content, response.headers)
+                break
+    print("Processo concluído!!!")
+    return HttpResponse("concluído")
