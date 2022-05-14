@@ -7,9 +7,10 @@
   <p>O valor atual estima para pagamento do cartão de crédito é: <b>{{ VALOR_TOTAL }}</b> com vencimento em <b>{{ VENCIMENTO|date:"d/m/Y" }}</b> com soma das compras parceladas no valor de: <b>{{ VALOR_TOTAL_CREDITO }}</b> .</b></p>
   A soma dos valores de terceiros é de <b>{{ VALOR_TOTAL_EXTERNO }}</b> e valor total final a ser pago será de <b>{{ VALOR_A_PAGAR }}</b> reais.
     <div class="mb-3 d-flex justify-content-end">
-        <a class="btn btn-warning" href="{% url 'fatura' %}" role="button"><ion-icon name="document-text-outline"></ion-icon> Fatura Atual </a>
+        <a class="btn btn-warning" href="{% url 'dashboard' %}" role="button"><ion-icon name="bar-chart-outline"></ion-icon> Dashboard </a>
+        <a class="btn btn-danger" href="{% url 'fatura' %}" role="button"><ion-icon name="document-text-outline"></ion-icon> Fatura Atual </a>
         <a class="btn btn-success" href="{% url 'fatura' DATA_PROXIMA %}" role="button"><ion-icon name="chevron-back-outline"></ion-icon> {{ PROX_MES }} </a>
-        <a class="btn btn-success" href="{% url 'fatura' DATA_ANTERIOR %}" role="button"> {{ MES_GASTOS }} <ion-icon name="chevron-forward-outline"></ion-icon></a>
+      <a class="btn btn-success" href="{% url 'fatura' DATA_ANTERIOR %}" role="button"> {{ MES_GASTOS }} <ion-icon name="chevron-forward-outline"></ion-icon></a>
         <a class="btn btn-primary" href="{% url 'add_compra' %}" role="button">Compra<ion-icon name="duplicate-outline"></ion-icon> </a>
     </div>
   <table class="table">
