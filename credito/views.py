@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
-from credito.models import Compras
+from credito.models import Compras, DataPagamento
 import datetime
 import requests
 from math import pi
@@ -108,7 +108,11 @@ def fatura(request, mes=None):
 
 
 def add_compra(request):
-    context = {'data_pagamento': next_payday(TODAY)}
+    dp = DataPagamento.objects.last()
+    if dp:
+        context = {'data_pagamento': dp.data_pagamento}
+    else:
+        context = {'data_pagamento': next_payday(TODAY)}
     responsaveis, categorias = [], []
     dados = Compras.objects.all()
 

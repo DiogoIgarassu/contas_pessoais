@@ -1,5 +1,5 @@
 from django.contrib import admin
-from credito.models import Compras
+from credito.models import Compras, DataPagamento
 
 
 class ComprasAdmin(admin.ModelAdmin):
@@ -13,3 +13,4 @@ class ComprasAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Compras, ComprasAdmin)
+admin.site.register(DataPagamento)

@@ -18,3 +18,14 @@ class Compras(models.Model):
     class Meta:
         verbose_name = 'Compra'
         verbose_name_plural = 'Compras'
+
+
+class DataPagamento(models.Model):
+    data_pagamento = data_pagamento = models.DateField('Data de Pagamento', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.data_pagamento)
+
+    class Meta:
+        verbose_name = 'Data de Pagamento'
+        verbose_name_plural = 'Datas de Pagamento'
